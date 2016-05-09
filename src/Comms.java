@@ -9,42 +9,35 @@ import java.lang.Throwable;
 public class Comms {
 static Socket clientSocket;
 static ServerSocket serverSocket;
-Queue<Message> taskList;
+LinkedBlockingQueue<Message> serverMessages = new LinkedBlockingQueue<Message>();
+LinkedBlockingQueue<Message> clientMessages = new LinkedBlockingQueue<Message>();
+CommThread myThread;
 
-	public static void sendMessage(Message thisOne) {
+	public static void sendMessage(Message thisOne, Object caller) {
 		
 	}
 	
-	public static void receiveMessage(Message thisOne) {
-		
+	public Message receiveMessage(Object caller) {
+		if (caller instanceof Client) {
+			return clientMessages.poll();
+		} else if (caller instanceof Server) {
+			return serverMessages.poll();
+		} else return new SystemMessage("Method was called from an unknown class object.");
 	}
 	
-	public static void main(String[] args) {
-		
-		try {
-			final ExecutorService clientPool = Executors.newFixedThreadPool(10);
-			serverSocket = new ServerSocket(60000);
-			
-			while (true) {
-				clientSocket = serverSocket.accept();
-				final ObjectInputStream receiver = new ObjectInputStream (clientSocket.getInputStream());
-				try {
-					((Message) receiver.readObject()).print();
-					clientSocket.close();
-					serverSocket.close();
-					System.exit(0);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		
-		}
+	public Boolean hasMessage(Object caller) {
+		if (caller instanceof Server) return ! serverMessages.isEmpty();
+		else if (caller instanceof Client) return ! clientMessages.isEmpty();
+		else return false;
+	}
+	
+	public void runServer() {
+		myThread = new CommThread(serverMessages);
+		myThread.start();
 	}
 	
 	public static void sendClientMessage(Message message) throws IOException {
-		Socket newSocket = new Socket("2a02:c7d:5275:3200:bce8:455a:6ab5:7b5c",60000);
+		Socket newSocket = new Socket("2a02:c7d:5275:3200:9193:efbf:89ad:2a3",60000);
 		final ObjectOutputStream sender = new ObjectOutputStream(newSocket.getOutputStream());
 		sender.writeObject(message);
 		sender.flush();
@@ -52,4 +45,8 @@ Queue<Message> taskList;
 		newSocket.close();
 	}
 	
+	public void shutdown() {
+		myThread.interrupt();
+	}
+
 }

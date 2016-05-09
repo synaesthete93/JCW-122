@@ -1,13 +1,11 @@
-import java.io.IOException;
-
 public class Client {
 	public static void main(String[] args) {
 		try {
-		Message tester = new Message();
+		Message tester = new SystemMessage("crapper");
 		Comms.sendClientMessage(tester);
-		} catch (IOException e) {
-			System.out.println("Something went wrong with the client socket;");
-		}
+		} catch (Exception e) {
+			 e.printStackTrace();
+		 }
 		
 		System.exit(0);
 	}
