@@ -23,10 +23,7 @@ public class CommThread extends Thread {
 				try {
 					Socket clientSocket = serverSocket.accept(); 
 					ObjectInputStream receiver = new ObjectInputStream (clientSocket.getInputStream());
-					Message newMessage = ((Message) receiver.readObject());
-					newMessage.response = clientSocket;
-					newMessage.returnStream = new ObjectOutputStream (clientSocket.getOutputStream());
-					list.add(newMessage);
+					list.add((Message) receiver.readObject());
 					
 				} catch (Exception e) {
 					e.printStackTrace();

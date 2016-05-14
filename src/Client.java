@@ -8,7 +8,7 @@ public class Client {
 	
 	public static void main(String[] args) { 
 		Message tester = new SystemMessage("Cunt");
-		System.out.println(Comms.sendClientMessage(tester).message);
+		Comms.sendClientMessage(tester);
 	}
 	
 	public void sendText(String text) {

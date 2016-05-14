@@ -38,20 +38,14 @@ static String ip;
 		myThread.start();
 	}
 	
-	public static Message sendClientMessage(Message message) {
+	public static void sendClientMessage(Message message) {
 		try (Socket newSocket = new Socket(Comms.ip,60000);
-			final ObjectOutputStream sender = new ObjectOutputStream(newSocket.getOutputStream());
-			final ObjectInputStream receiver = new ObjectInputStream(newSocket.getInputStream()) 
+			final ObjectOutputStream sender = new ObjectOutputStream(newSocket.getOutputStream())
 		){
-			message.returnStream = sender;
-			message.streamer = receiver;
 			sender.writeObject(message);
 			sender.flush();
-			Thread.currentThread().sleep(1000);
-			return ((Message) receiver.readObject());
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new SystemMessage("The message return has failed.");
 		}
 	}
 	

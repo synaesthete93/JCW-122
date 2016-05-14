@@ -14,7 +14,8 @@ public class Server {
 		while (active) {
 			if (serverComms.hasMessage(testServer)) {
 				Message receivedMessage = serverComms.receiveMessage(testServer);
-				Comms.respond(receivedMessage, new SystemMessage("The response system has worked"));
+				receivedMessage.print();
+				
 			}
 		}
 	}
