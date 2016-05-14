@@ -2,16 +2,17 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.io.*;
 import java.net.Socket;
+import java.net.URL;
 import java.net.ServerSocket;
 import java.lang.Throwable;
 
 
 public class Comms {
-static Socket clientSocket;
 static ServerSocket serverSocket;
 LinkedBlockingQueue<Message> serverMessages = new LinkedBlockingQueue<Message>();
 LinkedBlockingQueue<Message> clientMessages = new LinkedBlockingQueue<Message>();
 CommThread myThread;
+static String ip;
 
 	public static void sendMessage(Message thisOne, Object caller) {
 		
@@ -32,21 +33,61 @@ CommThread myThread;
 	}
 	
 	public void runServer() {
+		Comms.ip = Comms.ipInit();
 		myThread = new CommThread(serverMessages);
 		myThread.start();
 	}
 	
-	public static void sendClientMessage(Message message) throws IOException {
-		Socket newSocket = new Socket("2a02:c7d:5275:3200:9193:efbf:89ad:2a3",60000);
-		final ObjectOutputStream sender = new ObjectOutputStream(newSocket.getOutputStream());
-		sender.writeObject(message);
-		sender.flush();
-		sender.close();
-		newSocket.close();
+	public static Message sendClientMessage(Message message) {
+		try (Socket newSocket = new Socket(Comms.ip,60000);
+			final ObjectOutputStream sender = new ObjectOutputStream(newSocket.getOutputStream());
+			final ObjectInputStream receiver = new ObjectInputStream(newSocket.getInputStream()) 
+		){
+			message.returnStream = sender;
+			message.streamer = receiver;
+			sender.writeObject(message);
+			sender.flush();
+			Thread.currentThread().sleep(1000);
+			return ((Message) receiver.readObject());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new SystemMessage("The message return has failed.");
+		}
+	}
+	
+	public static void respond(Message m, Message r) {
+		try {
+			ObjectOutputStream output = new ObjectOutputStream(m.response.getOutputStream());
+			output.writeObject(r);
+			output.flush();
+			m.response.close();
+			
+		} catch (Exception e) {
+			 e.printStackTrace();
+		 }
 	}
 	
 	public void shutdown() {
 		myThread.interrupt();
+	}
+	
+	public static String ipInit() {
+		String ip;
+		try {
+			URL whatismyip = new URL("http://checkip.amazonaws.com");
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+		                whatismyip.openStream()));
+			ip = in.readLine();
+		} catch (Exception e) {
+			ip="";
+			e.printStackTrace();
+		}
+		
+		return ip;
+	}
+	
+	public class QListener implements EventListener {
+		
 	}
 
 }

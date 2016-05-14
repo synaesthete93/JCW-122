@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -19,11 +20,14 @@ public class CommThread extends Thread {
 			serverSocket = new ServerSocket(60000);
 			
 				while (active) {
-				Socket clientSocket = serverSocket.accept();
-				final ObjectInputStream receiver = new ObjectInputStream (clientSocket.getInputStream());
 				try {
-					list.add(((Message) receiver.readObject()));
-					clientSocket.close();
+					Socket clientSocket = serverSocket.accept(); 
+					ObjectInputStream receiver = new ObjectInputStream (clientSocket.getInputStream());
+					Message newMessage = ((Message) receiver.readObject());
+					newMessage.response = clientSocket;
+					newMessage.returnStream = new ObjectOutputStream (clientSocket.getOutputStream());
+					list.add(newMessage);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

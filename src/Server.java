@@ -1,5 +1,10 @@
+import java.util.ArrayList;
 
 public class Server {
+
+	ArrayList<Item> allItems = new ArrayList<Item>();
+	ArrayList<User> allUsers = new ArrayList<User>();
+	int lastItemID = 0;
 	
 	public static void main(String[] args) {
 		Server testServer = new Server();
@@ -9,11 +14,7 @@ public class Server {
 		while (active) {
 			if (serverComms.hasMessage(testServer)) {
 				Message receivedMessage = serverComms.receiveMessage(testServer);
-				if (receivedMessage.message.equals("shutdown")) {
-					serverComms.shutdown();
-					active = false;
-				}
-				else receivedMessage.print();
+				Comms.respond(receivedMessage, new SystemMessage("The response system has worked"));
 			}
 		}
 	}
