@@ -39,7 +39,7 @@ static String ip;
 	}
 	
 	public static void sendClientMessage(Message message) {
-		try (Socket newSocket = new Socket(Comms.ip,60000);
+		try (Socket newSocket = new Socket("50.19.209.3",60000);
 			final ObjectOutputStream sender = new ObjectOutputStream(newSocket.getOutputStream())
 		){
 			sender.writeObject(message);
